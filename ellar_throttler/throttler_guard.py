@@ -10,6 +10,7 @@ from ellar.services import Reflector
 from .constants import THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
 from .exception import ThrottledException
 from .interfaces import IThrottlerStorage
+from .throttler_module_options import ThrottlerModuleOptions
 
 
 @injectable()
@@ -17,10 +18,14 @@ class ThrottlerGuard(GuardCanActivate):
     header_prefix = "X-RateLimit"
 
     def __init__(
-        self, storage_service: IThrottlerStorage, reflector: Reflector
+        self,
+        storage_service: IThrottlerStorage,
+        reflector: Reflector,
+        options: ThrottlerModuleOptions,
     ) -> None:
         self.storage_service = storage_service
         self.reflector = reflector
+        self.options = options
 
     async def can_activate(self, context: IExecutionContext) -> bool:
         handler = context.get_handler()
@@ -28,7 +33,12 @@ class ThrottlerGuard(GuardCanActivate):
 
         # Return early if the current route should be skipped.
         # or self.options.skipIf?.(context)
-        if self.reflector.get_all_and_override(THROTTLER_SKIP, handler, class_ref):
+
+        if (
+            self.reflector.get_all_and_override(THROTTLER_SKIP, handler, class_ref)
+            or self.options.skip_if
+            and self.options.skip_if(context)
+        ):
             return True
 
         # Return early when we have no limit or ttl data.
@@ -40,8 +50,8 @@ class ThrottlerGuard(GuardCanActivate):
         )
 
         # Check if specific limits are set at class or route level, otherwise use global options.
-        limit = route_or_class_limit or 60  # or this.options.limit
-        ttl = route_or_class_ttl or 60  # or this.options.ttl
+        limit = route_or_class_limit or self.options.limit
+        ttl = route_or_class_ttl or self.options.ttl
         return await self.handle_request(context, limit, ttl)
 
     @classmethod
