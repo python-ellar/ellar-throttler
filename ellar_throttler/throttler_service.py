@@ -15,11 +15,12 @@ class ThrottlerStorageService(IThrottlerStorage):
     def __init__(self) -> None:
         self._storage: t.Dict[str, ThrottlerStorageOption] = {}
 
-    def _set(self, key: str, value: ThrottlerStorageOption) -> None:
-        self._storage[key] = value
+    def _set(self, key: str, value: ThrottlerStorageOption) -> ThrottlerStorageOption:
+        self.storage[key] = value
+        return value
 
     def _has_expired(self, key: str) -> bool:
-        exp = self._storage.get(key)
+        exp = self.storage.get(key)
         return exp is not None and exp.expires_at <= time.time()
 
     def _has_key(self, key: str) -> bool:
@@ -27,8 +28,8 @@ class ThrottlerStorageService(IThrottlerStorage):
 
     def _delete(self, key: str) -> bool:
         try:
-            self._storage.pop(key)
-        except KeyError:
+            self.storage.pop(key)
+        except KeyError:  # pragma: no cover
             return False
         return True
 
@@ -37,14 +38,17 @@ class ThrottlerStorageService(IThrottlerStorage):
             self._delete(key)
             return None
 
-        return self._storage.get(key)
+        return self.storage.get(key)
 
     @property
     def storage(self) -> t.Dict[str, ThrottlerStorageOption]:
         return self._storage
 
     def get_expiration_time(self, key: str) -> int:
-        return math.floor(self.storage[key].expires_at - time.time())
+        cache = self._get(key)
+        if cache is None:  # pragma: no cover
+            return -1
+        return math.floor(cache.expires_at - time.time())
 
     async def increment(self, key: str, ttl: int) -> ThrottlerStorageRecord:
         if not self._has_key(key):
@@ -53,20 +57,20 @@ class ThrottlerStorageService(IThrottlerStorage):
             )
 
         history = self._get(key)
-        assert history, "value can not be None"
-        now = time.time()
 
         time_to_expire = self.get_expiration_time(key)
 
         if time_to_expire <= 0:
-            history.total_hits = 0
-            history.expires_at = now + ttl
+            history = self._set(
+                key, ThrottlerStorageOption(total_hits=0, expires_at=time.time() + ttl)
+            )
             time_to_expire = self.get_expiration_time(key)
 
-        history.total_hits += 1
+        history.total_hits += 1  # type:ignore[union-attr]
 
         return ThrottlerStorageRecord(
-            total_hits=history.total_hits, time_to_expire=time_to_expire
+            total_hits=history.total_hits,  # type:ignore[union-attr]
+            time_to_expire=time_to_expire,
         )
 
 
@@ -76,7 +80,7 @@ class CacheThrottlerStorageService(IThrottlerStorage):
         self._cache_service = cache_service
 
     @property
-    def storage(self) -> t.Any:
+    def storage(self) -> t.Any:  # pragma: no cover
         return self._cache_service.get_backend()
 
     async def get_expiration_time(self, key: str) -> int:
