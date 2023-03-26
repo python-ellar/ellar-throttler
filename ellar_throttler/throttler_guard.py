@@ -71,7 +71,6 @@ class ThrottlerGuard(GuardCanActivate):
         self, context: IExecutionContext, limit: int, ttl: int
     ) -> bool:
         connection, response = self.get_request_response(context)
-        # TODO: Return early if the current user agent should be ignored.
 
         tracker = self.get_tracker(connection)
         key = self.generate_key(context, tracker)
