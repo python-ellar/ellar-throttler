@@ -3,6 +3,8 @@ import time
 import pytest
 from app.controller.module import ControllerModule
 from app.server import app
+from ellar.cache import CacheModule
+from ellar.cache.backends.local_cache import LocalMemCacheBackend
 from ellar.core import TestClient, TestClientFactory
 
 from ellar_throttler import (
@@ -85,9 +87,7 @@ class TestSkipIfConfigure:
     def test_skip_configure(self):
         test_module = TestClientFactory.create_test_module(
             modules=(
-                ThrottlerModule.module_configure(
-                    limit=5, ttl=100, skip_if=lambda ctx: True
-                ),
+                ThrottlerModule.setup(limit=5, ttl=100, skip_if=lambda ctx: True),
                 ControllerModule,
             ),
             global_guards=[ThrottlerGuard],
@@ -111,9 +111,11 @@ class TestThrottlerStorageServiceConfiguration:
             ThrottlerModule.setup(
                 limit=5, ttl=100, storage=CacheThrottlerStorageService
             ),
+            CacheModule.register_setup(),
             ControllerModule,
         ),
         global_guards=[ThrottlerGuard],
+        config_module=dict(CACHES={"default": LocalMemCacheBackend()}),
     )
 
     test_module_use_value = TestClientFactory.create_test_module(
