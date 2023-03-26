@@ -29,7 +29,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
                 IThrottlerStorage, use_class=ThrottlerStorageService
             )
 
-        return DynamicModule(
+        return DynamicModule(  # type: ignore
             cls,
             providers=[
                 _provider,
