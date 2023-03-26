@@ -34,10 +34,8 @@ class ThrottlerGuard(GuardCanActivate):
         # Return early if the current route should be skipped.
         # or self.options.skipIf?.(context)
 
-        if (
-            self.reflector.get_all_and_override(THROTTLER_SKIP, handler, class_ref)
-            or self.options.skip_if
-            and self.options.skip_if(context)
+        if self.reflector.get_all_and_override(THROTTLER_SKIP, handler, class_ref) or (
+            self.options.skip_if and self.options.skip_if(context)
         ):
             return True
 

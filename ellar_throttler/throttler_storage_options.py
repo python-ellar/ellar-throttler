@@ -1,7 +1,6 @@
-import dataclasses
+from ellar.serializer import Serializer
 
 
-@dataclasses.dataclass
-class ThrottlerStorageOption:
+class ThrottlerStorageOption(Serializer):
     total_hits: int
     expires_at: float

@@ -38,7 +38,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
                     use_value=ThrottlerModuleOptions(
                         limit=limit,
                         ttl=ttl,
-                        skip_if=skip_if,  # type:ignore[arg-type]
+                        skip_if=skip_if,
                     ),
                 ),
             ],

@@ -1,11 +1,10 @@
-import dataclasses
 import typing as t
 
 from ellar.core import IExecutionContext
+from ellar.serializer import Serializer
 
 
-@dataclasses.dataclass
-class ThrottlerModuleOptions:
+class ThrottlerModuleOptions(Serializer):
     # The amount of requests that are allowed within the ttl's time window.
     limit: int
 
@@ -14,4 +13,4 @@ class ThrottlerModuleOptions:
 
     # A factory method to determine if throttling should be skipped.
     # This can be based on the incoming context.
-    skip_if: t.Callable[[IExecutionContext], bool] = None  # type:ignore[assignment]
+    skip_if: t.Optional[t.Callable[[IExecutionContext], bool]] = None
