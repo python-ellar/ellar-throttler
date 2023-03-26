@@ -9,7 +9,7 @@ from .service import AppService
 
 
 @Module(
-    modules=[ThrottlerModule.module_configure(limit=5, ttl=60)],
+    modules=[ThrottlerModule.setup(limit=5, ttl=60)],
     controllers=(DefaultController, LimitController, AppController),
     providers=[AppService],
 )

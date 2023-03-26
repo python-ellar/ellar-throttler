@@ -108,7 +108,7 @@ class TestSkipIfConfigure:
 class TestThrottlerStorageServiceConfiguration:
     test_module_cache = TestClientFactory.create_test_module(
         modules=(
-            ThrottlerModule.module_configure(
+            ThrottlerModule.setup(
                 limit=5, ttl=100, storage=CacheThrottlerStorageService
             ),
             ControllerModule,
@@ -118,9 +118,7 @@ class TestThrottlerStorageServiceConfiguration:
 
     test_module_use_value = TestClientFactory.create_test_module(
         modules=(
-            ThrottlerModule.module_configure(
-                limit=5, ttl=100, storage=ThrottlerStorageService()
-            ),
+            ThrottlerModule.setup(limit=5, ttl=100, storage=ThrottlerStorageService()),
             ControllerModule,
         ),
         global_guards=[ThrottlerGuard],

@@ -2,7 +2,7 @@ import typing as t
 
 from ellar.common import Module
 from ellar.core import IExecutionContext
-from ellar.core.modules import DynamicModule, IModuleConfigure, ModuleBase
+from ellar.core.modules import DynamicModule, IModuleSetup, ModuleBase
 from ellar.di import ProviderConfig
 
 from ellar_throttler.interfaces import IThrottlerStorage
@@ -11,9 +11,9 @@ from ellar_throttler.throttler_service import ThrottlerStorageService
 
 
 @Module()
-class ThrottlerModule(ModuleBase, IModuleConfigure):
+class ThrottlerModule(ModuleBase, IModuleSetup):
     @classmethod
-    def module_configure(
+    def setup(
         cls,
         ttl: int,
         limit: int,

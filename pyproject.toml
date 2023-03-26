@@ -41,7 +41,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "ellar >= 0.2.2"
+    "ellar >= 0.3.4"
 ]
 
 
