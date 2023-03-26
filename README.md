@@ -71,7 +71,7 @@ Example with `@guards(ThrottlerGuard)`
 ```python
 # project_name/controller.py
 from ellar.common import Controller, guards
-from ellar_throttler import throttle, ThrottlerGuard, skip_throttle
+from ellar_throttler import throttle, ThrottlerGuard
 
 @Controller()
 class AppController:
