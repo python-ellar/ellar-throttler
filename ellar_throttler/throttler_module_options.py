@@ -1,7 +1,7 @@
 import typing as t
 
 from ellar.core import IExecutionContext
-from ellar.serializer import Serializer
+from ellar.core.serializer import Serializer
 
 
 class ThrottlerModuleOptions(Serializer):
