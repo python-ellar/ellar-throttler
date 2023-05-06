@@ -1,7 +1,7 @@
 import math
 import typing as t
 
-from ellar.core.exceptions import APIException
+from ellar.common import APIException
 from starlette import status
 
 

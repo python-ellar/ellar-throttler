@@ -1,8 +1,7 @@
 import typing as t
 
-from ellar.common import Module
-from ellar.core import IExecutionContext
-from ellar.core.modules import DynamicModule, IModuleSetup, ModuleBase
+from ellar.common import IExecutionContext, IModuleSetup, Module
+from ellar.core.modules import DynamicModule, ModuleBase
 from ellar.di import ProviderConfig
 
 from ellar_throttler.interfaces import IThrottlerStorage
