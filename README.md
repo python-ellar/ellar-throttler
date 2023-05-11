@@ -70,13 +70,13 @@ The global guard check can be skipped using the `@skip_throttle()` decorator men
 Example with `@guards(ThrottlerGuard)`
 ```python
 # project_name/controller.py
-from ellar.common import Controller, guards
+from ellar.common import Controller, Guards
 from ellar_throttler import throttle, ThrottlerGuard
 
 @Controller()
 class AppController:
 
-  @guards(ThrottlerGuard)
+  @Guards(ThrottlerGuard)
   @throttle(limit=5, ttl=30)
   def normal(self):
       pass
@@ -178,7 +178,7 @@ To work with Websockets you can extend the `ThrottlerGuard` and override the `ha
 ```python
 from ellar_throttler import ThrottlerGuard
 from ellar.di import injectable
-from ellar.core import IExecutionContext
+from ellar.common import IExecutionContext
 from ellar_throttler import ThrottledException
 
 @injectable()

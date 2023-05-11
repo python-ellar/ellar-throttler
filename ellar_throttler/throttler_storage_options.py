@@ -1,4 +1,4 @@
-from ellar.serializer import Serializer
+from ellar.common import Serializer
 
 
 class ThrottlerStorageOption(Serializer):
