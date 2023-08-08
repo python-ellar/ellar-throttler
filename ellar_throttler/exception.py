@@ -11,7 +11,9 @@ class ThrottledException(APIException):
     extra_detail_singular = "Expected available in {wait} second."
     extra_detail_plural = "Expected available in {wait} seconds."
 
-    def __init__(self, wait: float = None, detail: t.Any = None) -> None:
+    def __init__(
+        self, wait: t.Optional[float] = None, detail: t.Optional[t.Any] = None
+    ) -> None:
         if detail is None:
             detail = self.default_detail
         if wait is not None:
