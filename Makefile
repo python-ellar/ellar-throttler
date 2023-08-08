@@ -19,14 +19,12 @@ install-full: ## Install dependencies
 
 lint: ## Run code linters
 	black --check ellar_throttler tests
-	isort --check ellar_throttler tests
-	autoflake --remove-unused-variables --remove-unused-variables -r ellar_throttler tests
-	flake8 ellar_throttler tests
+	ruff check ellar_throttler tests
 	mypy ellar_throttler
 
 fmt format: ## Run code formatters
 	black ellar_throttler tests
-	isort ellar_throttler tests
+	ruff check --fix ellar_throttler tests
 
 test: ## Run tests
 	pytest tests

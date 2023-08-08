@@ -84,7 +84,7 @@ class CacheThrottlerStorageService(IThrottlerStorage):
         return self._cache_service.get_backend()
 
     async def get_expiration_time(self, key: str) -> int:
-        result = await self._cache_service.get_async(f"{key}-ttl")
+        result: int = await self._cache_service.get_async(f"{key}-ttl")
         return math.floor(result - time.time()) if result else -1
 
     async def increment(self, key: str, ttl: int) -> ThrottlerStorageRecord:

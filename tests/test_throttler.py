@@ -94,7 +94,7 @@ class TestSkipIfConfigure:
         )
 
         _client = test_module.get_test_client()
-        for i in range(15):
+        for _i in range(15):
             res = _client.get("/")
 
             assert res.status_code == 200
@@ -115,7 +115,7 @@ class TestThrottlerStorageServiceConfiguration:
             ControllerModule,
         ),
         global_guards=[ThrottlerGuard],
-        config_module=dict(CACHES={"default": LocalMemCacheBackend()}),
+        config_module={"CACHES": {"default": LocalMemCacheBackend()}},
     )
 
     test_module_use_value = Test.create_test_module(

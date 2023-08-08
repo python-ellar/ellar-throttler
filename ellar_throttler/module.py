@@ -16,8 +16,8 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
         cls,
         ttl: int,
         limit: int,
-        storage: t.Union[t.Type, t.Any] = None,
-        skip_if: t.Callable[[IExecutionContext], bool] = None,
+        storage: t.Union[t.Type, t.Any, None] = None,
+        skip_if: t.Optional[t.Callable[[IExecutionContext], bool]] = None,
     ) -> DynamicModule:
         if storage and isinstance(storage, IThrottlerStorage):
             _provider = ProviderConfig(IThrottlerStorage, use_value=storage)
@@ -28,7 +28,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
                 IThrottlerStorage, use_class=ThrottlerStorageService
             )
 
-        return DynamicModule(  # type:ignore
+        return DynamicModule(
             cls,
             providers=[
                 _provider,
