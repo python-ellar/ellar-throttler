@@ -52,7 +52,6 @@ class TestLimitController:
         ],
     )
     def test_limit_index(self, url, limit):
-
         for i in range(limit):
             res = client.get(url)
             assert res.status_code == 200
