@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="#" target="blank"><img src="docs/img/EllarLogoIconOnly.png" width="200" alt="Ellar Logo" /></a>
+  <a href="#" target="blank"><img src="https://eadwincode.github.io/ellar/img/EllarLogoB.png" width="200" alt="Ellar Logo" /></a>
 </p>
 
-<p align="center">A rate limiting module for Ellar</p>
+<p align="center">Ellar - Python ASGI web framework for building fast, efficient and scalable RESTful APIs and server-side application.</p>
 
 ![Test](https://github.com/eadwinCode/ellar-throttler/actions/workflows/test_full.yml/badge.svg)
 ![Coverage](https://img.shields.io/codecov/c/github/eadwinCode/ellar-throttler)
@@ -64,19 +64,19 @@ application = AppFactory.create_from_app_module(
 The above is also a valid configuration for `ThrottleModule` registration if you want to work with config.
 
 **NOTE**: If you add the `ThrottlerGuard` to your application `global_guards`, then all the incoming requests will be throttled by default. 
-This can also be omitted in favor of `@guards(ThrottlerGuard)`. 
+This can also be omitted in favor of `@UseGuards(ThrottlerGuard)`. 
 The global guard check can be skipped using the `@skip_throttle()` decorator mentioned later.
 
-Example with `@guards(ThrottlerGuard)`
+Example with `@UseGuards(ThrottlerGuard)`
 ```python
 # project_name/controller.py
-from ellar.common import Controller, guards
+from ellar.common import Controller, UseGuards
 from ellar_throttler import throttle, ThrottlerGuard
 
 @Controller()
 class AppController:
 
-  @guards(ThrottlerGuard)
+  @UseGuards(ThrottlerGuard)
   @throttle(limit=5, ttl=30)
   def normal(self):
       pass
@@ -98,11 +98,12 @@ a class that is skipped.
 
 ```python
 # project_name/controller.py
-from ellar.common import Controller
+from ellar.common import Controller, UseGuards
 from ellar_throttler import ThrottlerGuard, skip_throttle
 
 @skip_throttle()
-@Controller(guards=[ThrottlerGuard])
+@UseGuards(ThrottlerGuard)
+@Controller()
 class AppController:
   
     def do_skip(self):
@@ -168,7 +169,8 @@ class ThrottlerBehindProxyGuard(ThrottlerGuard):
 # project_name/controller.py
 from .throttler_behind_proxy import ThrottlerBehindProxyGuard
 
-@Controller('', guards=[ThrottlerBehindProxyGuard])
+@Controller('')
+@UseGuards(ThrottlerBehindProxyGuard)
 class AppController:
     pass
 ```
@@ -178,7 +180,7 @@ To work with Websockets you can extend the `ThrottlerGuard` and override the `ha
 ```python
 from ellar_throttler import ThrottlerGuard
 from ellar.di import injectable
-from ellar.core import IExecutionContext
+from ellar.common import IExecutionContext
 from ellar_throttler import ThrottledException
 
 @injectable()

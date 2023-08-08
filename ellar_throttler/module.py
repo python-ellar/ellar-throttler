@@ -1,8 +1,7 @@
 import typing as t
 
-from ellar.common import Module
-from ellar.core import IExecutionContext
-from ellar.core.modules import DynamicModule, IModuleSetup, ModuleBase
+from ellar.common import IExecutionContext, IModuleSetup, Module
+from ellar.core.modules import DynamicModule, ModuleBase
 from ellar.di import ProviderConfig
 
 from ellar_throttler.interfaces import IThrottlerStorage
@@ -17,8 +16,8 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
         cls,
         ttl: int,
         limit: int,
-        storage: t.Union[t.Type, t.Any] = None,
-        skip_if: t.Callable[[IExecutionContext], bool] = None,
+        storage: t.Union[t.Type, t.Any, None] = None,
+        skip_if: t.Optional[t.Callable[[IExecutionContext], bool]] = None,
     ) -> DynamicModule:
         if storage and isinstance(storage, IThrottlerStorage):
             _provider = ProviderConfig(IThrottlerStorage, use_value=storage)
@@ -29,7 +28,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
                 IThrottlerStorage, use_class=ThrottlerStorageService
             )
 
-        return DynamicModule(  # type: ignore
+        return DynamicModule(
             cls,
             providers=[
                 _provider,

@@ -5,7 +5,7 @@ from app.controller.module import ControllerModule
 from app.server import app
 from ellar.cache import CacheModule
 from ellar.cache.backends.local_cache import LocalMemCacheBackend
-from ellar.core import TestClient, TestClientFactory
+from ellar.testing import Test, TestClient
 
 from ellar_throttler import (
     CacheThrottlerStorageService,
@@ -85,7 +85,7 @@ class TestDefaultController:
 
 class TestSkipIfConfigure:
     def test_skip_configure(self):
-        test_module = TestClientFactory.create_test_module(
+        test_module = Test.create_test_module(
             modules=(
                 ThrottlerModule.setup(limit=5, ttl=100, skip_if=lambda ctx: True),
                 ControllerModule,
@@ -93,8 +93,8 @@ class TestSkipIfConfigure:
             global_guards=[ThrottlerGuard],
         )
 
-        _client = test_module.get_client()
-        for i in range(15):
+        _client = test_module.get_test_client()
+        for _i in range(15):
             res = _client.get("/")
 
             assert res.status_code == 200
@@ -106,7 +106,7 @@ class TestSkipIfConfigure:
 
 
 class TestThrottlerStorageServiceConfiguration:
-    test_module_cache = TestClientFactory.create_test_module(
+    test_module_cache = Test.create_test_module(
         modules=(
             ThrottlerModule.setup(
                 limit=5, ttl=100, storage=CacheThrottlerStorageService
@@ -115,10 +115,10 @@ class TestThrottlerStorageServiceConfiguration:
             ControllerModule,
         ),
         global_guards=[ThrottlerGuard],
-        config_module=dict(CACHES={"default": LocalMemCacheBackend()}),
+        config_module={"CACHES": {"default": LocalMemCacheBackend()}},
     )
 
-    test_module_use_value = TestClientFactory.create_test_module(
+    test_module_use_value = Test.create_test_module(
         modules=(
             ThrottlerModule.setup(limit=5, ttl=100, storage=ThrottlerStorageService()),
             ControllerModule,
@@ -138,7 +138,7 @@ class TestThrottlerStorageServiceConfiguration:
 
     @pytest.mark.parametrize("test_module", [test_module_cache, test_module_use_value])
     def test_limit_index(self, test_module):
-        _client = test_module.get_client()
+        _client = test_module.get_test_client()
 
         for url, limit in [("/limit/", 2), ("/limit/higher", 5)]:
             self.request_for_limit(_client, url, limit)
@@ -151,7 +151,7 @@ class TestThrottlerStorageServiceConfiguration:
 
     @pytest.mark.parametrize("test_module", [test_module_cache, test_module_use_value])
     def test_limit_get_shorter(self, test_module):
-        _client = test_module.get_client()
+        _client = test_module.get_test_client()
         limit, url = (
             5,
             "/limit/shorter",
@@ -167,7 +167,7 @@ class TestThrottlerStorageServiceConfiguration:
 
     @pytest.mark.parametrize("test_module", [test_module_use_value])
     def test_limit_get_shorter_cache_clear(self, test_module):
-        _client = test_module.get_client()
+        _client = test_module.get_test_client()
         limit, url = (
             5,
             "/limit/shorter-2",
