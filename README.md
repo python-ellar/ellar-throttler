@@ -1,8 +1,8 @@
 <p align="center">
-  <a href="#" target="blank"><img src="https://eadwincode.github.io/ellar/img/EllarLogoB.png" width="200" alt="Ellar Logo" /></a>
+  <a href="#" target="blank"><img src="https://python-ellar.github.io/ellar/img/EllarLogoB.png" width="200" alt="Ellar Logo" /></a>
 </p>
 
-<p align="center">Ellar - Python ASGI web framework for building fast, efficient and scalable RESTful APIs and server-side application.</p>
+<p align="center">Ellar - Python ASGI web framework for building fast, efficient, and scalable RESTful APIs and server-side applications.</p>
 
 ![Test](https://github.com/eadwinCode/ellar-throttler/actions/workflows/test_full.yml/badge.svg)
 ![Coverage](https://img.shields.io/codecov/c/github/eadwinCode/ellar-throttler)
