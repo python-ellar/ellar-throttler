@@ -1,4 +1,4 @@
-from ellar.core import AppFactory
+from ellar.app import AppFactory
 
 from ellar_throttler import ThrottlerGuard
 
