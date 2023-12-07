@@ -2,7 +2,7 @@ import hashlib
 import typing as t
 
 from ellar.common import GuardCanActivate, IExecutionContext, Response
-from ellar.common.helper import get_name
+from ellar.common.utils import get_name
 from ellar.core.connection import HTTPConnection
 from ellar.core.services import Reflector
 from ellar.di import injectable

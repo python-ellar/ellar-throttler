@@ -9,6 +9,7 @@ clean: ## Removing cached python compiled files
 	find . -name \*pyo | xargs  rm -fv
 	find . -name \*~  | xargs  rm -fv
 	find . -name __pycache__  | xargs  rm -rfv
+	find . -name .ruff_cache  | xargs  rm -rfv
 
 install: ## Install dependencies
 	flit install --deps develop --symlink
@@ -17,13 +18,12 @@ install-full: ## Install dependencies
 	make install
 	pre-commit install -f
 
-lint: ## Run code linters
-	black --check ellar_throttler tests
+lint:fmt ## Run code linters
 	ruff check ellar_throttler tests
 	mypy ellar_throttler
 
-fmt format: ## Run code formatters
-	black ellar_throttler tests
+fmt format:clean ## Run code formatters
+	ruff format ellar_throttler tests
 	ruff check --fix ellar_throttler tests
 
 test: ## Run tests
