@@ -14,7 +14,7 @@ authors = [
 dynamic = ["version", "description"]
 requires-python = ">=3.8"
 readme = "README.md"
-home-page = "https://github.com/eadwinCode/ellar-throttler"
+home-page = "https://github.com/python-ellar/ellar-throttler"
 classifiers = [
     "Intended Audience :: Information Technology",
     "Intended Audience :: System Administrators",
@@ -45,9 +45,9 @@ dependencies = [
 
 
 [project.urls]
-Documentation = "https://github.com/eadwinCode/ellar-throttler"
-Source = "https://github.com/eadwinCode/ellar-throttler"
-Homepage = "https://eadwincode.github.io/ellar-throttler/"
+Documentation = "https://github.com/python-ellar/ellar-throttler"
+Source = "https://github.com/python-ellar/ellar-throttler"
+Homepage = "https://python-ellar.github.io/ellar-throttler/"
 
 [project.optional-dependencies]
 test = [
