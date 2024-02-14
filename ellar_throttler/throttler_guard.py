@@ -2,10 +2,10 @@ import hashlib
 import typing as t
 
 from ellar.common import GuardCanActivate, IExecutionContext, Response
-from ellar.common.utils import get_name
 from ellar.core.connection import HTTPConnection
 from ellar.core.services import Reflector
 from ellar.di import injectable
+from ellar.utils import get_name
 
 from .constants import THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
 from .exception import ThrottledException
@@ -60,8 +60,10 @@ class ThrottlerGuard(GuardCanActivate):
         return connection_host.get_client(), connection_host.get_response()
 
     def get_tracker(self, connection: HTTPConnection) -> str:
-        assert connection.client
-        return connection.client.host
+        if connection.client:
+            return connection.client.host
+
+        return t.cast(str, connection.scope["server"][0])
 
     def generate_key(self, context: IExecutionContext, suffix: str) -> str:
         prefix = f"{get_name(context.get_class())}-{get_name(context.get_handler())}"
