@@ -60,8 +60,10 @@ class ThrottlerGuard(GuardCanActivate):
         return connection_host.get_client(), connection_host.get_response()
 
     def get_tracker(self, connection: HTTPConnection) -> str:
-        assert connection.client
-        return connection.client.host
+        if connection.client:
+            return connection.client.host
+
+        return t.cast(str, connection.scope["server"][0])
 
     def generate_key(self, context: IExecutionContext, suffix: str) -> str:
         prefix = f"{get_name(context.get_class())}-{get_name(context.get_handler())}"
