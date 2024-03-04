@@ -1,6 +1,6 @@
 """A rate limiting module for Ellar"""
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from .decorators import skip_throttle, throttle
 from .exception import ThrottledException
