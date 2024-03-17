@@ -1,11 +1,11 @@
 from ellar.common import Controller, get
 
-from ellar_throttler import throttle
+from ellar_throttler import Throttle
 
 from .service import AppService
 
 
-@throttle(limit=2, ttl=10)
+@Throttle(annon={"limit": 2, "ttl": 10})  # overriding annon[throttler] config
 @Controller("/limit")
 class LimitController:
     def __init__(self, app_service: AppService):
@@ -15,17 +15,21 @@ class LimitController:
     def get_throttled(self):
         return self.app_service.success()
 
-    @throttle(limit=5, ttl=10)
+    @Throttle(annon={"limit": 5, "ttl": 10})  # overriding annon[throttler] config
     @get("/higher")
     def get_higher(self):
         return self.app_service.success()
 
     @get("/shorter")
-    @throttle(limit=5, ttl=2)
+    @Throttle(
+        annon={"limit": 3, "ttl": 5}, user={"limit": 3, "ttl": 3}
+    )  # overriding annon and user throttler config
     def get_shorter(self):
         return self.app_service.success()
 
     @get("/shorter-2")
-    @throttle(limit=5, ttl=2)
+    @Throttle(
+        annon={"limit": 2, "ttl": 5}, user={"limit": 2, "ttl": 3}
+    )  # overriding annon and user throttler config
     def get_shorter_2(self):
         return self.app_service.success()
