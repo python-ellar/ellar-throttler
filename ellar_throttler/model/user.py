@@ -1,12 +1,11 @@
 import typing as t
 
-from ellar.common import IExecutionContext
 from ellar.core import HTTPConnection
 
-from .base import BaseThrottler
+from .http import HTTPThrottler
 
 
-class UserThrottler(BaseThrottler):
+class UserThrottler(HTTPThrottler):
     def __init__(
         self,
         name: str = "user",
@@ -23,9 +22,6 @@ class UserThrottler(BaseThrottler):
             header_prefix=header_prefix,
             name=name,
         )
-
-    def skip_if(self, context: IExecutionContext) -> bool:
-        return False
 
     async def get_tracker_identity(self, connection: HTTPConnection) -> str:
         if connection.user and connection.user.is_authenticated:

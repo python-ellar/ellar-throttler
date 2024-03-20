@@ -2,10 +2,10 @@ import typing as t
 
 from ellar.common import IExecutionContext
 
-from .base import BaseThrottler
+from .http import HTTPThrottler
 
 
-class AnonymousThrottler(BaseThrottler):
+class AnonymousThrottler(HTTPThrottler):
     def __init__(
         self,
         name: str = "anon",
@@ -24,6 +24,10 @@ class AnonymousThrottler(BaseThrottler):
         )
 
     def skip_if(self, context: IExecutionContext) -> bool:
+        if super().skip_if(context):
+            return True
+
         if context.user.is_authenticated:
             return True
+
         return False

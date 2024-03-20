@@ -45,9 +45,10 @@ dependencies = [
 
 
 [project.urls]
-Documentation = "https://github.com/python-ellar/ellar-throttler"
+Homepage = "https://github.com/python-ellar/ellar-throttler"
 Source = "https://github.com/python-ellar/ellar-throttler"
-Homepage = "https://python-ellar.github.io/ellar-throttler/"
+Documentation = "https://python-ellar.github.io/ellar-throttler/"
+"Bug Tracker" = "https://github.com/python-ellar/ellar-throttler/issues"
 
 [tool.ruff]
 select = [

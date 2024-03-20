@@ -37,3 +37,9 @@ pre-commit-lint: ## Runs Requires commands during pre-commit
 	make clean
 	make fmt
 	make lint
+
+doc-deploy:clean ## Run Deploy Documentation
+	mkdocs gh-deploy --force --ignore-version
+
+doc-serve: ## Launch doc local server
+	mkdocs serve

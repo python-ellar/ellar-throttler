@@ -64,7 +64,7 @@ class BaseThrottler(IThrottleModel, ABC):
     @classmethod
     def get_request_response(
         cls, context: IExecutionContext
-    ) -> t.Tuple[HTTPConnection, Response]:
+    ) -> t.Tuple[HTTPConnection, t.Optional[Response]]:
         connection_host = context.switch_to_http_connection()
         return connection_host.get_client(), connection_host.get_response()
 
@@ -97,12 +97,26 @@ class BaseThrottler(IThrottleModel, ABC):
                 self.name, wait=result.time_to_expire, detail=error_message_
             )
 
-        response.headers[f"{self.header_prefix}-Limit-{self.name}"] = str(limit)
-        response.headers[f"{self.header_prefix}-Remaining-{self.name}"] = str(
-            max(0, limit - result.total_hits)
-        )
-        response.headers[f"{self.header_prefix}-Reset-{self.name}"] = str(
-            result.time_to_expire
-        )
+        if response:
+            response.headers[f"{self.header_prefix}-Limit-{self.name}"] = str(limit)
+            response.headers[f"{self.header_prefix}-Remaining-{self.name}"] = str(
+                max(0, limit - result.total_hits)
+            )
+            response.headers[f"{self.header_prefix}-Reset-{self.name}"] = str(
+                result.time_to_expire
+            )
 
         return True
+
+    def __str__(self) -> str:
+        def _format_rate(seconds: int) -> str:
+            if 1 <= seconds < 60:
+                return f"{seconds % 1}day(s)"
+            elif 60 <= seconds < 3600:
+                return f"{seconds % 60}min(s)"
+            elif 3600 <= seconds < 86400:
+                return f"{seconds % 3600}hour(s)"
+            else:
+                return f"{seconds % 86400}day(s)"
+
+        return f"<{self.__class__.__name__} name={self.name} rate={self.limit}/{_format_rate(self.ttl)} ignoreAgents={self.ignore_user_agents}>"

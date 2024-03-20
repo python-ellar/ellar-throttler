@@ -65,8 +65,7 @@ class IThrottleModel:
         This overrides the default logic of the make_key_function method.
         :param context: IExecutionContext
         :param suffix: String
-        :param name: String
-        :return: String
+        :return:
         """
 
     @abstractmethod
@@ -84,8 +83,7 @@ class IThrottleModel:
         :param context: IExecutionContext
         :param storage_service: Storage Service Instance
         :param ttl: amount of seconds of how many requests are allowed within this time.
-        :param limit: amount of requests that are allowed within the ttl's time window
-        :param ignore_user_agents: An array of regular expressions of user-agents to ignore when it comes to throttling requests
-        :param error_message: An array of regular expressions of user-agents to ignore when it comes to throttling requests
+        :param limit: The Number of requests that are allowed within the ttl's time window
+        :param error_message: An array of regular expressions of user agents to ignore when it comes to throttling requests
         :return:
         """

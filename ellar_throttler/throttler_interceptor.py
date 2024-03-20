@@ -26,6 +26,7 @@ class ThrottlerInterceptor(EllarInterceptor):
     ) -> t.Any:
         handler = context.get_handler()
         class_ref = context.get_class()
+
         connection = context.switch_to_http_connection().get_client()
         user_agent = connection.headers.get("User-Agent")
 
@@ -44,7 +45,7 @@ class ThrottlerInterceptor(EllarInterceptor):
             if skip_route_throttle:
                 continue
 
-            # Continue if throttler model says skip otherwise
+            # Continue if a throttler model says skip otherwise
             if throttler.skip_if(context):
                 continue
 
