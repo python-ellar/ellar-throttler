@@ -4,13 +4,11 @@
 
 <p align="center">Ellar - Python ASGI web framework for building fast, efficient, and scalable RESTful APIs and server-side applications.</p>
 
-![Test](https://github.com/eadwinCode/ellar-throttler/actions/workflows/test_full.yml/badge.svg)
-![Coverage](https://img.shields.io/codecov/c/github/eadwinCode/ellar-throttler)
+![Test](https://github.com/python-ellar/ellar-throttler/actions/workflows/test_full.yml/badge.svg)
+![Coverage](https://img.shields.io/codecov/c/github/python-ellar/ellar-throttler)
 [![PyPI version](https://badge.fury.io/py/ellar-throttler.svg)](https://badge.fury.io/py/ellar-throttler)
 [![PyPI version](https://img.shields.io/pypi/v/ellar-throttler.svg)](https://pypi.python.org/pypi/ellar-throttler)
 [![PyPI version](https://img.shields.io/pypi/pyversions/ellar-throttler.svg)](https://pypi.python.org/pypi/ellar-throttler)
-
-Full Documentation: [Here](https://eadwincode.github.io/ellar/throttling/)
 
 ## Introduction
 A rate limit module for Ellar
@@ -82,4 +80,4 @@ class LimitController:
 ```
 
 ## References
-- [Documentation](https://python-ellar.github.io/ellar-throttler/)
+- [Documentation](https://python-ellar.github.io/ellar/technique/rate-limit)
