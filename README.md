@@ -81,3 +81,6 @@ class LimitController:
 
 ## References
 - [Documentation](https://python-ellar.github.io/ellar/techniques/rate-limit)
+
+## License
+Ellar is [MIT licensed](LICENSE).
