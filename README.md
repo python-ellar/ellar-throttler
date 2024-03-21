@@ -80,4 +80,4 @@ class LimitController:
 ```
 
 ## References
-- [Documentation](https://python-ellar.github.io/ellar/technique/rate-limit)
+- [Documentation](https://python-ellar.github.io/ellar/techniques/rate-limit)
