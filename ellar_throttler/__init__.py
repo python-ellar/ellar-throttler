@@ -2,20 +2,24 @@
 
 __version__ = "0.1.3"
 
-from .decorators import skip_throttle, throttle
+from .decorators import SkipThrottle, Throttle
 from .exception import ThrottledException
 from .interfaces import IThrottlerStorage
+from .model import AnonymousThrottler, BaseThrottler, UserThrottler
 from .module import ThrottlerModule
-from .throttler_guard import ThrottlerGuard
+from .throttler_interceptor import ThrottlerInterceptor
 from .throttler_service import CacheThrottlerStorageService, ThrottlerStorageService
 
 __all__ = [
-    "throttle",
-    "skip_throttle",
+    "Throttle",
+    "SkipThrottle",
     "ThrottlerModule",
-    "ThrottlerGuard",
+    "ThrottlerInterceptor",
     "ThrottledException",
     "CacheThrottlerStorageService",
     "ThrottlerStorageService",
     "IThrottlerStorage",
+    "AnonymousThrottler",
+    "UserThrottler",
+    "BaseThrottler",
 ]

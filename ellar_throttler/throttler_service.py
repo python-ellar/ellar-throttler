@@ -78,28 +78,40 @@ class ThrottlerStorageService(IThrottlerStorage):
 class CacheThrottlerStorageService(IThrottlerStorage):
     def __init__(self, cache_service: ICacheService) -> None:
         self._cache_service = cache_service
+        self.cache_backend = "default"
 
     @property
     def storage(self) -> t.Any:  # pragma: no cover
-        return self._cache_service.get_backend()
+        return self._cache_service.get_backend(self.cache_backend)
+
+    def make_key(self, key: str) -> str:
+        return f"{key}-ttl-{self.cache_backend}"
 
     async def get_expiration_time(self, key: str) -> int:
-        result: int = await self._cache_service.get_async(f"{key}-ttl")
+        result: int = await self._cache_service.get_async(
+            self.make_key(key), backend=self.cache_backend
+        )
         return math.floor(result - time.time()) if result else -1
 
     async def increment(self, key: str, ttl: int) -> ThrottlerStorageRecord:
-        if not await self._cache_service.has_key_async(key):
-            await self._cache_service.set_async(key, 0, ttl)
-            await self._cache_service.set_async(f"{key}-ttl", time.time() + ttl, ttl)
+        if not await self._cache_service.has_key_async(key, backend=self.cache_backend):
+            await self._cache_service.set_async(key, 0, ttl, backend=self.cache_backend)
+            await self._cache_service.set_async(
+                self.make_key(key), time.time() + ttl, ttl, backend=self.cache_backend
+            )
 
         time_to_expire = await self.get_expiration_time(key)
 
         if time_to_expire <= 0:
-            await self._cache_service.set_async(key, 0, ttl)
-            await self._cache_service.set_async(f"{key}-ttl", time.time() + ttl, ttl)
+            await self._cache_service.set_async(key, 0, ttl, backend=self.cache_backend)
+            await self._cache_service.set_async(
+                self.make_key(key), time.time() + ttl, ttl, backend=self.cache_backend
+            )
             time_to_expire = await self.get_expiration_time(key)
 
-        total_hits = await self._cache_service.incr_async(key)
+        total_hits = await self._cache_service.incr_async(
+            key, backend=self.cache_backend
+        )
 
         return ThrottlerStorageRecord(
             total_hits=total_hits, time_to_expire=time_to_expire

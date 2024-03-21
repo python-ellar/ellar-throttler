@@ -2,13 +2,17 @@ import typing as t
 
 from ellar.common import IExecutionContext, Serializer
 
+from ellar_throttler.interfaces import IThrottleModel
+
 
 class ThrottlerModuleOptions(Serializer):
-    # The amount of requests that are allowed within the ttl's time window.
-    limit: int
+    throttlers: t.List[IThrottleModel]
 
-    #  The amount of seconds of how many requests are allowed within this time.
-    ttl: int
+    # A string which overrides the default throttler error message
+    error_message: t.Optional[str] = None
+
+    # An array of regular expressions of user-agents to ignore when it comes to throttling requests
+    ignore_user_agents: t.List[str] = []
 
     # A factory method to determine if throttling should be skipped.
     # This can be based on the incoming context.

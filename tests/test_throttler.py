@@ -9,9 +9,10 @@ from ellar.testing import Test, TestClient
 
 from ellar_throttler import (
     CacheThrottlerStorageService,
-    ThrottlerGuard,
+    ThrottlerInterceptor,
     ThrottlerModule,
     ThrottlerStorageService,
+    UserThrottler,
 )
 
 client = TestClient(app)
@@ -34,9 +35,9 @@ class TestAppController:
         res = client.get("/")
         assert res.status_code == 200
         assert res.json() == {"success": True}
-        assert res.headers["x-ratelimit-limit"] == "2"
-        assert res.headers["x-ratelimit-remaining"] == "1"
-        assert res.headers["x-ratelimit-reset"] == "9"
+        assert res.headers["x-ratelimit-limit-annon"] == "2"
+        assert res.headers["x-ratelimit-remaining-annon"] == "1"
+        assert res.headers["x-ratelimit-reset-annon"] == "9"
 
 
 class TestLimitController:
@@ -57,14 +58,14 @@ class TestLimitController:
             assert res.status_code == 200
             assert res.json() == {"success": True}
 
-            assert res.headers["x-ratelimit-limit"] == str(limit)
-            assert res.headers["x-ratelimit-remaining"] == str(limit - (i + 1))
-            assert "x-ratelimit-reset" in res.headers
+            assert res.headers["x-ratelimit-limit-annon"] == str(limit)
+            assert res.headers["x-ratelimit-remaining-annon"] == str(limit - (i + 1))
+            assert "x-ratelimit-reset-annon" in res.headers
 
         res = client.get(url)
         assert res.status_code == 429
         assert "Request was throttled. Expected available in" in res.json()["detail"]
-        assert "retry-after" in res.headers
+        assert "retry-after-annon" in res.headers
 
 
 class TestDefaultController:
@@ -77,52 +78,62 @@ class TestDefaultController:
         assert res.status_code == 200
         assert res.json() == {"success": True}
 
-        assert res.headers["x-ratelimit-limit"] == "5"
-        assert res.headers["x-ratelimit-remaining"] == "4"
-        assert "x-ratelimit-reset" in res.headers
+        assert res.headers["x-ratelimit-limit-annon"] == "5"
+        assert res.headers["x-ratelimit-remaining-annon"] == "4"
+        assert "x-ratelimit-reset-annon" in res.headers
 
 
-class TestSkipIfConfigure:
+class TestGlobalSkipIfConfigure:
     def test_skip_configure(self):
         test_module = Test.create_test_module(
             modules=(
-                ThrottlerModule.setup(limit=5, ttl=100, skip_if=lambda ctx: True),
+                ThrottlerModule.setup(
+                    throttlers=[UserThrottler(limit=5, ttl=100)],
+                    skip_if=lambda ctx: True,
+                ),
                 ControllerModule,
             ),
-            global_guards=[ThrottlerGuard],
         )
+        test_module.create_application().use_global_interceptors(ThrottlerInterceptor)
 
         _client = test_module.get_test_client()
+
         for _i in range(15):
             res = _client.get("/")
 
             assert res.status_code == 200
             assert res.json() == {"success": True}
 
-            assert "x-ratelimit-limit" not in res.headers
-            assert "x-ratelimit-remaining" not in res.headers
-            assert "x-ratelimit-reset" not in res.headers
+            assert "x-ratelimit-limit-user" not in res.headers
+            assert "x-ratelimit-remaining-user" not in res.headers
+            assert "x-ratelimit-reset-user" not in res.headers
 
 
 class TestThrottlerStorageServiceConfiguration:
     test_module_cache = Test.create_test_module(
         modules=(
             ThrottlerModule.setup(
-                limit=5, ttl=100, storage=CacheThrottlerStorageService
+                storage=CacheThrottlerStorageService,
+                throttlers=[UserThrottler(limit=5, ttl=100)],
             ),
             CacheModule.register_setup(),
             ControllerModule,
         ),
-        global_guards=[ThrottlerGuard],
         config_module={"CACHES": {"default": LocalMemCacheBackend()}},
     )
+    test_module_cache.create_application().use_global_interceptors(ThrottlerInterceptor)
 
     test_module_use_value = Test.create_test_module(
         modules=(
-            ThrottlerModule.setup(limit=5, ttl=100, storage=ThrottlerStorageService()),
+            ThrottlerModule.setup(
+                storage=ThrottlerStorageService(),
+                throttlers=[UserThrottler(limit=5, ttl=100)],
+            ),
             ControllerModule,
         ),
-        global_guards=[ThrottlerGuard],
+    )
+    test_module_use_value.create_application().use_global_interceptors(
+        ThrottlerInterceptor
     )
 
     def request_for_limit(self, app_client, url, limit):
@@ -131,28 +142,28 @@ class TestThrottlerStorageServiceConfiguration:
             assert res.status_code == 200
             assert res.json() == {"success": True}
 
-            assert res.headers["x-ratelimit-limit"] == str(limit)
-            assert res.headers["x-ratelimit-remaining"] == str(limit - (i + 1))
-            assert "x-ratelimit-reset" in res.headers
+            assert res.headers["x-ratelimit-limit-user"] == str(limit)
+            assert res.headers["x-ratelimit-remaining-user"] == str(limit - (i + 1))
+            assert "x-ratelimit-reset-user" in res.headers
 
     @pytest.mark.parametrize("test_module", [test_module_cache, test_module_use_value])
     def test_limit_index(self, test_module):
         _client = test_module.get_test_client()
 
-        for url, limit in [("/limit/", 2), ("/limit/higher", 5)]:
+        for url, limit in [("/limit/", 5), ("/limit/higher", 5)]:
             self.request_for_limit(_client, url, limit)
             res = _client.get(url)
             assert res.status_code == 429
             assert (
                 "Request was throttled. Expected available in" in res.json()["detail"]
             )
-            assert "retry-after" in res.headers
+            assert "retry-after-user" in res.headers
 
     @pytest.mark.parametrize("test_module", [test_module_cache, test_module_use_value])
     def test_limit_get_shorter(self, test_module):
         _client = test_module.get_test_client()
         limit, url = (
-            5,
+            3,
             "/limit/shorter",
         )
 
@@ -160,15 +171,14 @@ class TestThrottlerStorageServiceConfiguration:
 
         res = _client.get(url)
         assert res.status_code == 429
-        time.sleep(1)  # quick restart
         res = _client.get(url)
-        assert res.headers["x-ratelimit-remaining"] == str(limit - 1)
+        assert res.headers["retry-after-user"] == "2"
 
     @pytest.mark.parametrize("test_module", [test_module_use_value])
     def test_limit_get_shorter_cache_clear(self, test_module):
         _client = test_module.get_test_client()
         limit, url = (
-            5,
+            2,
             "/limit/shorter-2",
         )
 
@@ -178,4 +188,4 @@ class TestThrottlerStorageServiceConfiguration:
         assert res.status_code == 429
         time.sleep(2)  # quick restart
         res = _client.get(url)
-        assert res.headers["x-ratelimit-remaining"] == str(limit - 1)
+        assert res.headers["x-ratelimit-remaining-user"] == str(limit - 1)

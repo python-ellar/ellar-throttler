@@ -1,12 +1,12 @@
 from ellar.common import Controller, get
 
-from ellar_throttler import skip_throttle, throttle
+from ellar_throttler import SkipThrottle, Throttle
 
 from .service import AppService
 
 
 @Controller("/")
-@throttle(limit=2, ttl=10)
+@Throttle(annon={"limit": 2, "ttl": 10})
 class AppController:
     def __init__(self, app_service: AppService):
         self.app_service = app_service
@@ -16,6 +16,6 @@ class AppController:
         return self.app_service.success()
 
     @get("/ignored")
-    @skip_throttle()
+    @SkipThrottle()
     async def ignored(self):
         return self.app_service.ignored()
