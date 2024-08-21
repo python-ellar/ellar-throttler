@@ -44,7 +44,7 @@ class AppModule:
 
 ```python
 from ellar.common import Controller, get
-from ellar_throttler import Throttle
+from ellar_throttler import Throttle, AnonymousThrottler, UserThrottler
 from ellar.di import injectable
 
 
@@ -63,7 +63,7 @@ class AppService:
         return {message: True}
 
 
-@Throttle(apply_interceptor=True)
+@Throttle(intercept=True)
 @Controller("/limit")
 class LimitController:
     def __init__(self, app_service: AppService):
@@ -76,6 +76,11 @@ class LimitController:
     @get("/shorter")
     @Throttle(anon={"limit": 3, "ttl": 5}, user={"limit": 3, "ttl": 3}) # overriding anon and user throttler config
     def get_shorter(self, use_auth: bool):
+        return self.app_service.success(use_auth)
+
+    @get("/shorter-inline-throttling")
+    @Throttle(AnonymousThrottler(ttl=5, limit=3), UserThrottler(ttl=3, limit=3)) # overriding global throttling options
+    def get_shorter_inline_version(self, use_auth: bool):
         return self.app_service.success(use_auth)
 ```
 

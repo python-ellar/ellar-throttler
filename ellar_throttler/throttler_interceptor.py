@@ -4,7 +4,7 @@ from ellar.common import EllarInterceptor, IExecutionContext
 from ellar.core.services import Reflector
 from ellar.di import injectable
 
-from .constants import THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
+from .constants import INLINE_THROTTLERS, THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
 from .interfaces import IThrottlerStorage
 from .throttler_module_options import ThrottlerModuleOptions
 
@@ -37,7 +37,13 @@ class ThrottlerInterceptor(EllarInterceptor):
         if self.reflector.get_all_and_override(THROTTLER_SKIP, handler, class_ref):
             return await next_interceptor()
 
-        for throttler in self.options.throttlers:
+        inline_throttlers = (
+            self.reflector.get_all_and_override(INLINE_THROTTLERS, handler, class_ref)
+            or []
+        )
+        throttlers = inline_throttlers or self.options.throttlers
+
+        for throttler in throttlers:
             # Continue if throttler was skipped
             skip_route_throttle = self.reflector.get_all_and_override(
                 f"{THROTTLER_SKIP}-{throttler.name}", handler, class_ref

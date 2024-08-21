@@ -76,9 +76,10 @@ class ThrottlerStorageService(IThrottlerStorage):
 
 @injectable()
 class CacheThrottlerStorageService(IThrottlerStorage):
+    cache_backend: str = "default"
+
     def __init__(self, cache_service: ICacheService) -> None:
         self._cache_service = cache_service
-        self.cache_backend = "default"
 
     @property
     def storage(self) -> t.Any:  # pragma: no cover
