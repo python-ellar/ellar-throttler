@@ -1,9 +1,12 @@
+from ellar.app import use_global_interceptors
+
 from ellar.common import Module
 
-from ellar_throttler import AnonymousThrottler, ThrottlerModule, UserThrottler
+from ellar_throttler import AnonymousThrottler, ThrottlerModule, UserThrottler, ThrottlerInterceptor
 
 from .controller.module import ControllerModule
 
+use_global_interceptors(ThrottlerInterceptor)
 
 @Module(
     modules=(

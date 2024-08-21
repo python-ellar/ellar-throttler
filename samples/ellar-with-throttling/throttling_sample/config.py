@@ -8,6 +8,8 @@ export ELLAR_CONFIG_MODULE=throttling_sample.config:DevelopmentConfig
 
 import typing as t
 
+from starlette.requests import Request
+
 from ellar.common import IExceptionHandler, JSONResponse
 from ellar.core import ConfigDefaultTypesMixin
 from ellar.core.versioning import BaseAPIVersioning, DefaultAPIVersioning
