@@ -6,7 +6,7 @@ from ellar_throttler.constants import THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER
 
 
 def test_throttle_defines_interceptor():
-    @Throttle(apply_interceptor=True)
+    @Throttle(intercept=True)
     def target():
         pass
 

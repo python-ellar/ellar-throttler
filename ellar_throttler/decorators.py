@@ -3,7 +3,9 @@ import typing as t
 from ellar.common import constants, set_metadata
 from ellar.reflect import reflect
 
-from .constants import THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
+from ellar_throttler.model.base import BaseThrottler
+
+from .constants import INLINE_THROTTLERS, THROTTLER_LIMIT, THROTTLER_SKIP, THROTTLER_TTL
 from .throttler_interceptor import ThrottlerInterceptor
 
 
@@ -14,7 +16,9 @@ class _Config(t.TypedDict):
     ttl: int
 
 
-def Throttle(*, apply_interceptor: bool = False, **kwargs: _Config) -> t.Callable:
+def Throttle(
+    *throttlers: BaseThrottler, intercept: bool = False, **kwargs: _Config
+) -> t.Callable:
     """
     Adds metadata to the target which will be handled by the ThrottlerGuard to
     handle incoming requests based on the given metadata.
@@ -24,11 +28,14 @@ def Throttle(*, apply_interceptor: bool = False, **kwargs: _Config) -> t.Callabl
 
     @Throttle(throttler_model_name={'limit':20, 'ttl':300})
     class ControllerSample:
-        @Throttle('user', limit=20, ttl=300)
+        @Throttle(user={'limit':20, 'ttl':300})
         async def index(self):
             ...
 
-    :param apply_interceptor: Indicates whether to apply ThrottlerInterceptor
+    @Throttle(AnonymousThrottler(ttl=5, limit=3), UserThrottler(ttl=3, limit=3)) # overriding global throttling options
+    class ControllerSample:
+        pass
+    :param intercept: Indicates whether to apply ThrottlerInterceptor
     :param kwargs: Throttler name used in setting up ThrottlerModule with overriding config
     :return: Callable
     """
@@ -39,7 +46,10 @@ def Throttle(*, apply_interceptor: bool = False, **kwargs: _Config) -> t.Callabl
                 reflect.define_metadata(f"{THROTTLER_TTL}-{k}", v.get("ttl"), func_)
                 reflect.define_metadata(f"{THROTTLER_LIMIT}-{k}", v.get("limit"), func_)
 
-        if apply_interceptor:
+        if throttlers:
+            reflect.define_metadata(INLINE_THROTTLERS, list(throttlers), func_)
+
+        if intercept:
             return set_metadata(constants.ROUTE_INTERCEPTORS, [ThrottlerInterceptor])(  # type:ignore[no-any-return]
                 func_
             )

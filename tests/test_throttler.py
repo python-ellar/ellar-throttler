@@ -39,6 +39,17 @@ class TestAppController:
         assert res.headers["x-ratelimit-remaining-annon"] == "1"
         assert res.headers["x-ratelimit-reset-annon"] == "9"
 
+    def test_inline_throttling(self):
+        for _ in range(10):
+            res = client.get("/inline-throttler-model")
+            assert res.status_code == 200
+            assert res.json() == {"success": True}
+
+        res = client.get("/inline-throttler-model")
+        assert res.status_code == 429
+
+        assert res.headers["retry-after-anon"] == "4"
+
 
 class TestLimitController:
     """

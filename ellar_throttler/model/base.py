@@ -7,8 +7,8 @@ from ellar.core import HTTPConnection
 from ellar.utils import get_name
 from starlette.responses import Response
 
-from ellar_throttler import IThrottlerStorage, ThrottledException
-from ellar_throttler.interfaces import IThrottleModel
+from ellar_throttler.exception import ThrottledException
+from ellar_throttler.interfaces import IThrottleModel, IThrottlerStorage
 
 
 class BaseThrottler(IThrottleModel, ABC):

@@ -1,14 +1,19 @@
 import functools
 import typing as t
 
+from ellar.cache import CacheModule
 from ellar.common import IExecutionContext, IModuleSetup, Module
+from ellar.common.exceptions import ImproperConfiguration
 from ellar.core import Config, ModuleSetup
-from ellar.core.modules import DynamicModule, ModuleBase
+from ellar.core.modules import DynamicModule, ModuleBase, ModuleRefBase
 from ellar.di import ProviderConfig
 
 from ellar_throttler.interfaces import IThrottleModel, IThrottlerStorage
 from ellar_throttler.throttler_module_options import ThrottlerModuleOptions
-from ellar_throttler.throttler_service import ThrottlerStorageService
+from ellar_throttler.throttler_service import (
+    CacheThrottlerStorageService,
+    ThrottlerStorageService,
+)
 
 
 class _Config(t.TypedDict):
@@ -19,8 +24,23 @@ class _Config(t.TypedDict):
     skip_if: t.Optional[t.Callable[[IExecutionContext], bool]]
 
 
-@Module()
+@Module(name="ThrottlerModule", exports=[IThrottlerStorage, ThrottlerModuleOptions])
 class ThrottlerModule(ModuleBase, IModuleSetup):
+    @classmethod
+    def post_build(cls, module_ref: "ModuleRefBase") -> None:
+        storage = module_ref.providers.get(IThrottlerStorage)
+        if storage.use_class and (  # type:ignore[union-attr]
+            storage.use_class == CacheThrottlerStorageService  # type:ignore[union-attr]
+            or issubclass(storage.use_class, CacheThrottlerStorageService)  # type:ignore[union-attr]
+        ):
+            try:
+                module_ref.tree_manager.add_module_dependency(cls, CacheModule)
+            except ValueError:
+                raise ImproperConfiguration(
+                    f"Using {CacheThrottlerStorageService} as storage type requires {CacheModule} setup. "
+                    f"See https://python-ellar.github.io/ellar/security/rate-limit/"
+                ) from None
+
     @classmethod
     def setup(
         cls,
@@ -66,7 +86,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
 
     @staticmethod
     def __register_setup_factory(
-        module: t.Type["ThrottlerModule"],
+        module_ref: ModuleRefBase,
         config: Config,
         override_config: t.Dict[str, t.Any],
     ) -> DynamicModule:
@@ -81,7 +101,7 @@ class ThrottlerModule(ModuleBase, IModuleSetup):
             schema = ThrottlerModuleOptions.model_validate(
                 defined_config, from_attributes=True
             )
-
+            module = t.cast(t.Type[ThrottlerModule], module_ref.module)
             return module.__setup_module(schema, storage)
         raise RuntimeError(
             "Could not find `ELLAR_THROTTLER_CONFIG` in application config."

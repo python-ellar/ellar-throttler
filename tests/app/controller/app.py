@@ -1,6 +1,6 @@
 from ellar.common import Controller, get
 
-from ellar_throttler import SkipThrottle, Throttle
+from ellar_throttler import AnonymousThrottler, SkipThrottle, Throttle
 
 from .service import AppService
 
@@ -19,3 +19,8 @@ class AppController:
     @SkipThrottle()
     async def ignored(self):
         return self.app_service.ignored()
+
+    @get("/inline-throttler-model")
+    @Throttle(AnonymousThrottler(ttl=5, limit=10))
+    async def inline_model(self):
+        return self.app_service.success()
